@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <link rel="stylesheet" href="./css/styles.css">
-    </head>
+</head>
   
   <body class="body_grey">
     <div class="container container__white">
@@ -14,12 +14,20 @@
             <div class="col-sm-12">
                 <h1 id="siteTitle" class="text-center"></h1>
                 <p id="siteDescription" class="text-center"></p>
-                <hr>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-12">
-                <p>Menu</p>
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+                        <div class="nav navbar-nav">
+                            <ul class="nav navbar-nav" id="mainMenu">
+                                <li><a href="#home">Home</a></li>
+                                <li><a href="#media">Media</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
             </div>
         </div>
         <div class="row">
@@ -33,5 +41,4 @@
     </div>
     <script src="js/app.js"></script>
   </body>
-  
-  </html>
+</html>
