@@ -137,7 +137,7 @@ function getMedia() {
     response.json().then(data => {
       setPageHeading( 'Media' );
       clearContent();
-      data.map( img => renderImage( img.source_url ));
+      data.map( img => renderImage( img.source_url, img.alt_text ));
     });
   })
   .catch(function(err) {
@@ -145,10 +145,11 @@ function getMedia() {
   });    
 };
 
-function renderImage ( image ) {
+function renderImage ( image, alt_text ) {
   const img = document.createElement( 'img' );
         pageContent = document.getElementById( 'contentInner' );
   img.src = image;
+  img.alt = alt_text;
   img.classList = 'img-responsive img-margin';
 
   pageContent.appendChild( img );
