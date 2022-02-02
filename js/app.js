@@ -80,6 +80,8 @@ function loadContent() {
   const slug = getSlug();
   if ( null === slug || 'home' === slug ) {
     console.log( 'blog' );
+  } else if ( 'media' === slug ) {
+    getMedia();
   } else {
     getPageContent( slug );
   }
@@ -93,6 +95,8 @@ function getSlug() {
     return slug.substr( 1 );
   }
 };
+
+/* get content by page slug */
 
 function getPageContent( slug ) {
   fetch( API_ROUTE + 'wp/v2/pages?slug=' + slug )
@@ -119,6 +123,35 @@ function setPageContent( content ) {
   const pageContentInner = document.getElementById( 'contentInner' );
   clearContent();
   pageContentInner.innerHTML = content;
+};
+
+/* get site media */
+
+function getMedia() {
+  fetch( API_ROUTE + 'wp/v2/media')
+  .then(response => {
+    if (response.status !== 200) {
+      console.log("Problem! Status Code: " + response.status);
+      return;
+    }
+    response.json().then(data => {
+      setPageHeading( 'Media' );
+      clearContent();
+      data.map( img => renderImage( img.source_url ));
+    });
+  })
+  .catch(function(err) {
+    console.log("Error: ", err);
+  });    
+};
+
+function renderImage ( image ) {
+  const img = document.createElement( 'img' );
+        pageContent = document.getElementById( 'contentInner' );
+  img.src = image;
+  img.classList = 'img-responsive img-margin';
+
+  pageContent.appendChild( img );
 };
 
 /* utilities */

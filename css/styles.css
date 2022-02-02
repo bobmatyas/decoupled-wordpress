@@ -1,8 +1,13 @@
 
 .body_grey { 
-    background-color: #eee;
+    background-color: rgb(147, 197, 255);
 }
 
 .container__white {
     background-color: #fff;
+}
+
+.footer,
+.img-margin {
+    margin: 25px 0;
 }
