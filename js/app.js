@@ -81,7 +81,7 @@ function loadContent() {
   if ( null === slug || 'home' === slug ) {
     console.log( 'blog' );
   } else {
-    console.log( slug );
+    getPageContent( slug );
   }
 };
 
@@ -92,4 +92,48 @@ function getSlug() {
   } else {
     return slug.substr( 1 );
   }
+};
+
+function getPageContent( slug ) {
+  fetch( API_ROUTE + 'wp/v2/pages?slug=' + slug )
+  .then(response => {
+    if (response.status !== 200) {
+      console.log("Problem! Status Code: " + response.status);
+      return;
+    }
+    response.json().then(data => {
+      console.log(data[0].title.rendered);
+      setPageHeading(data[0].title.rendered);
+      setPageContent(data[0].content.rendered);
+      if ( slug != '' | slug != 'home' ) {
+          clearSidebar();
+      }
+    });
+  })
+  .catch(function(err) {
+    console.log("Error: ", err);
+  });    
+};
+
+function setPageContent( content ) {
+  const pageContentInner = document.getElementById( 'contentInner' );
+  clearContent();
+  pageContentInner.innerHTML = content;
+};
+
+/* utilities */
+
+function clearContent() {
+  const pageContentInner = document.getElementById( 'contentInner' );
+  pageContentInner.innerHTML = '';
+};
+
+function clearSidebar() {
+  const sidebarContent = document.getElementById( 'sidebar' );
+  sidebarContent.innerHTML = '';
+};
+
+function setPageHeading( heading ) {
+  const header =  document.getElementById( 'pageHeader' );
+  header.innerText = heading;
 };
