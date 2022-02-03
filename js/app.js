@@ -79,7 +79,7 @@ function listenForPageChange() {
 function loadContent() {  
   const slug = getSlug();
   if ( null === slug || 'home' === slug ) {
-    console.log( 'blog' );
+    getBlogPostList();
   } else if ( 'media' === slug ) {
     getMedia();
   } else {
@@ -153,6 +153,57 @@ function renderImage ( image, alt_text ) {
   img.classList = 'img-responsive img-margin';
 
   pageContent.appendChild( img );
+};
+
+/* blog display */
+
+function getBlogPostList( offset ) {
+  
+  let route = API_ROUTE + 'wp/v2/posts'
+  
+  if ( offset != null ) {
+    route = route + 'offset=' + offset;
+  }
+
+  fetch( route )
+  .then(response => {
+    if (response.status !== 200) {
+      console.log("Problem! Status Code: " + response.status);
+      return;
+    }
+    response.json().then(data => {
+      setPageHeading( 'Blog' );
+      clearContent();
+      data.map( post => RenderPost( post.title.rendered, post.slug, post.date, post.excerpt.rendered ));
+    });
+  })
+  .catch(function(err) {
+    console.log("Error: ", err);
+  });    
+};
+
+function RenderPost( title, slug, date, excerpt) {
+  const contentInner = document.getElementById( 'contentInner' );
+  const postHolder = document.createElement( 'article' );
+        postLink = document.createElement( 'h3' );
+        postMeta = document.createElement( 'p' );
+        postExcerpt = document.createElement( 'p' );
+        postReadMoreHolder = document.createElement( 'p' );
+        postReadMoreLink = document.createElement( 'a' );
+        
+        postLink.innerText = title;
+        postMeta.innerText = date;
+        postExcerpt.innerHTML = excerpt;
+        postReadMoreLink.href = `/blog/#${slug}`;
+        postReadMoreLink.innerText = `Read More`;
+
+        postHolder.appendChild( postLink );
+        postHolder.appendChild( postMeta );
+        postHolder.appendChild( postExcerpt );
+        postReadMoreHolder.appendChild( postReadMoreLink );
+        postHolder.appendChild( postReadMoreHolder );
+
+        contentInner.appendChild( postHolder );
 };
 
 /* utilities */
