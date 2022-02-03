@@ -174,7 +174,7 @@ function getBlogPostList( offset ) {
     response.json().then(data => {
       setPageHeading( 'Blog' );
       clearContent();
-      data.map( post => RenderPost( post.title.rendered, post.slug, post.date, post.excerpt.rendered ));
+      data.map( post => renderPost( post.title.rendered, post.slug, post.date, post.excerpt.rendered ));
     });
   })
   .catch(function(err) {
@@ -182,7 +182,7 @@ function getBlogPostList( offset ) {
   });    
 };
 
-function RenderPost( title, slug, date, excerpt) {
+function renderPost( title, slug, date, excerpt) {
   const contentInner = document.getElementById( 'contentInner' );
   const postHolder = document.createElement( 'article' );
         postLink = document.createElement( 'h3' );
@@ -205,6 +205,33 @@ function RenderPost( title, slug, date, excerpt) {
 
         contentInner.appendChild( postHolder );
 };
+
+function getAllTags() {
+  fetch( API_ROUTE + 'wp/v2/tags')
+  .then(response => {
+    if (response.status !== 200) {
+      console.log("Problem! Status Code: " + response.status);
+      return;
+    }
+    response.json().then(data => {      
+      data.map( tag => renderTaxonomyList( 'tags', tag.id, tag.name ));
+    });
+  })
+  .catch(function(err) {
+    console.log("Error: ", err);
+  });    
+};
+
+
+function renderTaxonomyList( type, id, name ) {
+  const taxonomyItem = document.createElement( 'li' );
+        taxonomyLink = document.createElement( 'a' );
+
+        taxonomyLink.href = `#${type}/${id}`
+        taxonomyLink.innerText = name;
+        taxonomyItem.appendChild( taxonomyLink );
+};
+
 
 /* utilities */
 
