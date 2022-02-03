@@ -190,9 +190,10 @@ function renderPost( title, slug, date, excerpt) {
         postExcerpt = document.createElement( 'p' );
         postReadMoreHolder = document.createElement( 'p' );
         postReadMoreLink = document.createElement( 'a' );
-        
+        postSeparator = document.createElement( 'hr' );
+
         postLink.innerText = title;
-        postMeta.innerText = date;
+        postMeta.innerText = formatDate( date );
         postExcerpt.innerHTML = excerpt;
         postReadMoreLink.href = `/blog/#${slug}`;
         postReadMoreLink.innerText = `Read More`;
@@ -202,7 +203,8 @@ function renderPost( title, slug, date, excerpt) {
         postHolder.appendChild( postExcerpt );
         postReadMoreHolder.appendChild( postReadMoreLink );
         postHolder.appendChild( postReadMoreHolder );
-
+        postHolder.appendChild( postSeparator );
+        
         contentInner.appendChild( postHolder );
 };
 
@@ -248,4 +250,11 @@ function clearSidebar() {
 function setPageHeading( heading ) {
   const header =  document.getElementById( 'pageHeader' );
   header.innerText = heading;
+};
+
+function formatDate( date ) {
+  const dateFromApi = new Date( date );
+        dateFormatted = dateFromApi.toLocaleDateString() + " " + dateFromApi.toLocaleTimeString();
+  
+  return dateFormatted;
 };
