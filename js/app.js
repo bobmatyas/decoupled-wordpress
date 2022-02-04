@@ -6,6 +6,7 @@ const API_ROUTE = 'https://sandalwood.mystagingwebsite.com/wp-json/' // define m
 
 getSiteInfo();
 setupMenu();
+getBlogPostList();
 listenForPageChange();
 
 /* get site title / description */
@@ -78,17 +79,44 @@ function listenForPageChange() {
 
 function loadContent() {  
   const slug = getSlug();
+
   if ( null === slug || 'home' === slug ) {
     getBlogPostList();
   } else if ( 'media' === slug ) {
     getMedia();
+  } else if ( slug.indexOf( '/blog/' ) ) {
+    let shortSlug = checkSpecialTypes( 'blog', slug );
+    console.log( shortSlug );
+    getBlogPost( slug );
   } else {
     getPageContent( slug );
   }
 };
 
+/* this function handles special pages: blog posts, tags, and categories */
+
+function checkSpecialTypes( type, slug ) {
+    let newSlug;
+
+    switch (type) {
+      case 'blog':
+        newSlug = slug.replace('blog/', '');
+        break;
+      case 'tags': 
+        newSlug = slug.replace('tags/', '');
+        break;
+      case 'categories':
+        newSlug = slug.replace('categories/', '');
+        break;
+    }
+
+    return newSlug;
+};
+
+
 function getSlug() {
   slug = window.location.hash;
+  
   if( "" === slug ) {
     return null;
   } else {
@@ -158,11 +186,11 @@ function renderImage ( image, alt_text ) {
 /* blog display */
 
 function getBlogPostList( offset ) {
-  
+
   let route = API_ROUTE + 'wp/v2/posts'
   
   if ( offset != null ) {
-    route = route + 'offset=' + offset;
+    route = route + '?offset=' + offset;
   }
 
   fetch( route )
@@ -175,8 +203,9 @@ function getBlogPostList( offset ) {
       setPageHeading( 'Blog' );
       clearContent();
       clearSidebar();
-      getAllTags();
-      data.map( post => renderPost( post.title.rendered, post.slug, post.date, post.excerpt.rendered ));
+      getTaxonomies( 'tags' );
+      getTaxonomies( 'categories' );
+      data.map( post => renderPostInList( post.title.rendered, post.slug, post.date, post.excerpt.rendered ));
     });
   })
   .catch(function(err) {
@@ -184,7 +213,7 @@ function getBlogPostList( offset ) {
   });    
 };
 
-function renderPost( title, slug, date, excerpt) {
+function renderPostInList( title, slug, date, excerpt) {
   const contentInner = document.getElementById( 'contentInner' );
   const postHolder = document.createElement( 'article' );
         postLink = document.createElement( 'h3' );
@@ -194,32 +223,39 @@ function renderPost( title, slug, date, excerpt) {
         postReadMoreLink = document.createElement( 'a' );
         postSeparator = document.createElement( 'hr' );
 
-        postLink.innerText = title;
-        postMeta.innerText = formatDate( date );
-        postExcerpt.innerHTML = excerpt;
-        postReadMoreLink.href = `/blog/#${slug}`;
-        postReadMoreLink.innerText = `Read More`;
+  postLink.innerText = title;
+  postMeta.classList = 'text-muted small';
+  postMeta.innerText = formatDate( date );
+  postExcerpt.innerHTML = excerpt;
+  postReadMoreLink.href = `#blog/${slug}`;
+  postReadMoreLink.innerText = `Read More`;
 
-        postHolder.appendChild( postLink );
-        postHolder.appendChild( postMeta );
-        postHolder.appendChild( postExcerpt );
-        postReadMoreHolder.appendChild( postReadMoreLink );
-        postHolder.appendChild( postReadMoreHolder );
-        postHolder.appendChild( postSeparator );
+  postHolder.appendChild( postLink );
+  postHolder.appendChild( postMeta );
+  postHolder.appendChild( postExcerpt );
+  postReadMoreHolder.appendChild( postReadMoreLink );
+  postHolder.appendChild( postReadMoreHolder );
+  postHolder.appendChild( postSeparator );
         
-        contentInner.appendChild( postHolder );
+  contentInner.appendChild( postHolder );
 };
 
-function getAllTags() {
-  fetch( API_ROUTE + 'wp/v2/tags')
+function getBlogPost( slug ) {
+  console.log( 'single post view' );
+
+}
+
+/* handle taxonomies */
+function getTaxonomies( type ) {
+  fetch( API_ROUTE + 'wp/v2/' + type )
   .then(response => {
     if (response.status !== 200) {
       console.log("Problem! Status Code: " + response.status);
       return;
     }
     response.json().then(data => {
-      renderTaxonomyHolder( 'tags' );
-      data.map( tag => renderTaxonomyList( 'tags', tag.id, tag.name ));
+      renderTaxonomyHolder( type );
+      data.map( taxonomy => renderTaxonomyList( type, taxonomy.id, taxonomy.name ));
     });
   })
   .catch(function(err) {
@@ -247,11 +283,11 @@ function renderTaxonomyList( type, id, name ) {
   const taxonomyItem = document.createElement( 'li' );
         taxonomyLink = document.createElement( 'a' );
         taxonomyList = document.getElementById( type + 'List');
-        console.log( taxonomyList );
-        taxonomyLink.href = `${type}/#${id}`
-        taxonomyLink.innerText = name;
-        taxonomyItem.appendChild( taxonomyLink );
-        taxonomyList.appendChild( taxonomyItem );
+
+  taxonomyLink.href = `#${type}/${id}`
+  taxonomyLink.innerText = name;
+  taxonomyItem.appendChild( taxonomyLink );
+  taxonomyList.appendChild( taxonomyItem );      
 };
 
 
