@@ -174,6 +174,8 @@ function getBlogPostList( offset ) {
     response.json().then(data => {
       setPageHeading( 'Blog' );
       clearContent();
+      clearSidebar();
+      getAllTags();
       data.map( post => renderPost( post.title.rendered, post.slug, post.date, post.excerpt.rendered ));
     });
   })
@@ -215,7 +217,8 @@ function getAllTags() {
       console.log("Problem! Status Code: " + response.status);
       return;
     }
-    response.json().then(data => {      
+    response.json().then(data => {
+      renderTaxonomyHolder( 'tags' );
       data.map( tag => renderTaxonomyList( 'tags', tag.id, tag.name ));
     });
   })
@@ -224,14 +227,31 @@ function getAllTags() {
   });    
 };
 
+function renderTaxonomyHolder( type ) {
+  const taxonomyHolder = document.createElement( 'div' );
+        taxonomyHeading = document.createElement( 'h4' );
+        taxonomyList = document.createElement( 'ul' );
+        sideBar = document.getElementById( 'sideBar' );
+
+  taxonomyHolder.id =  `${type}Holder`;
+  taxonomyList.id = `${type}List`;
+  type = type[0].toUpperCase() + type.substring(1);
+  taxonomyHeading.innerText = type;
+
+  sideBar.appendChild( taxonomyHolder );
+  sideBar.appendChild( taxonomyHeading );
+  sideBar.appendChild( taxonomyList );
+};
 
 function renderTaxonomyList( type, id, name ) {
   const taxonomyItem = document.createElement( 'li' );
         taxonomyLink = document.createElement( 'a' );
-
-        taxonomyLink.href = `#${type}/${id}`
+        taxonomyList = document.getElementById( type + 'List');
+        console.log( taxonomyList );
+        taxonomyLink.href = `${type}/#${id}`
         taxonomyLink.innerText = name;
         taxonomyItem.appendChild( taxonomyLink );
+        taxonomyList.appendChild( taxonomyItem );
 };
 
 
@@ -243,8 +263,8 @@ function clearContent() {
 };
 
 function clearSidebar() {
-  const sidebarContent = document.getElementById( 'sidebar' );
-  sidebarContent.innerHTML = '';
+  const sideBarContent = document.getElementById( 'sideBar' );
+  sideBarContent.innerHTML = '';
 };
 
 function setPageHeading( heading ) {
