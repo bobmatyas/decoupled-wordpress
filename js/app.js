@@ -1,3 +1,5 @@
+"use strict";
+(function () {
 
 const API_ROUTE = 'https://sandalwood.mystagingwebsite.com/wp-json/' // define main site URL
 
@@ -80,14 +82,14 @@ function loadContent() {
   const slug = getSlug();
  
   if ( null === slug ) {
-    setPageHeading( 'Blog' );
-    getBlogPostList( 'home' );
-    clearSidebar();
-    getSideBar();
+      setPageHeading( 'Blog' );
+      getBlogPostList( 'home' );
+      clearSidebar();
+      getSideBar();
   } else if ( slug.includes ( 'home/') ) {
-    let shortSlug = checkSpecialTypes( 'home', slug );
-    getBlogPostList( 'home', shortSlug );
-    setPageHeading( 'Blog' );     
+      let shortSlug = checkSpecialTypes( 'home', slug );
+      getBlogPostList( 'home', shortSlug );
+      setPageHeading( 'Blog' );     
   } else if ( 'home' === slug ) {
       setPageHeading( 'Blog' );
       getBlogPostList( 'home' );
@@ -139,7 +141,7 @@ function checkSpecialTypes( type, slug ) {
 
 
 function getSlug() {
-  slug = window.location.hash;
+  const slug = window.location.hash;
   
   if( "" === slug ) {
     return null;
@@ -160,7 +162,7 @@ function getPageContent( slug ) {
     response.json().then(data => {
       setPageHeading(data[0].title.rendered);
       setPageContent(data[0].content.rendered);
-      if ( slug != '' | slug != 'home' ) {
+      if ( slug != '' ) {
           clearSidebar();
       }
     });
@@ -197,7 +199,7 @@ function getMedia() {
 };
 
 function renderImage ( image, alt_text ) {
-  const img = document.createElement( 'img' );
+  const img = document.createElement( 'img' ),
         pageContent = document.getElementById( 'contentInner' );
   img.src = image;
   img.alt = alt_text;
@@ -231,22 +233,28 @@ function getBlogPostList( is_home, offset, tag_limit, category_limit ) {
       clearSidebar();
       data.map( post => renderPostInList( post.title.rendered, post.slug, post.date, post.excerpt.rendered ));
       getSideBar();
-      console.log(offset);
-      console.log(is_home);
+      const totalPages = response.headers.get('x-wp-totalpages');
+      const totalPagesNumeric = parseInt( totalPages );
+      
       if ( null != is_home ) {
-        const nextPage = document.createElement( 'a' );
-        nextPage.className = 'btn btn-primary'  ;
-        if ( undefined === offset) {
-          nextPage.href = '#home/2';
-        } else {
+        
+        const numericOffset = parseInt( offset );
 
-          let increment = parseInt(offset) + 1;
-          nextPage.href = `#home/${increment}`
+        if ( totalPagesNumeric > numericOffset || undefined === offset ) {
+          const nextPage = document.createElement( 'a' );
+          nextPage.className = 'btn btn-primary'  ;
+          if ( undefined === offset) {
+            nextPage.href = '#home/2';
+          } else {
+            let increment = numericOffset + 1;
+            nextPage.href = `#home/${increment}`
+          }
+
+          nextPage.innerText  = 'Next';
+          const container = document.getElementById( 'contentInner' );
+          container.appendChild( nextPage );  
+      
         }
-
-        nextPage.innerText  = 'Next';
-        const container = document.getElementById( 'contentInner' );
-        container.appendChild( nextPage );  
       }
     });
   })
@@ -256,13 +264,13 @@ function getBlogPostList( is_home, offset, tag_limit, category_limit ) {
 };
 
 function renderPostInList( title, slug, date, excerpt) {
-  const contentInner = document.getElementById( 'contentInner' );
-  const postHolder = document.createElement( 'article' );
-        postLink = document.createElement( 'h3' );
-        postMeta = document.createElement( 'p' );
-        postExcerpt = document.createElement( 'p' );
-        postReadMoreHolder = document.createElement( 'p' );
-        postReadMoreLink = document.createElement( 'a' );
+  const contentInner = document.getElementById( 'contentInner' ),
+        postHolder = document.createElement( 'article' ),
+        postLink = document.createElement( 'h3' ),
+        postMeta = document.createElement( 'p' ),
+        postExcerpt = document.createElement( 'p' ),
+        postReadMoreHolder = document.createElement( 'p' ),
+        postReadMoreLink = document.createElement( 'a' ),
         postSeparator = document.createElement( 'hr' );
 
   postLink.innerText = title;
@@ -336,9 +344,9 @@ function getComments( post_id ) {
 };
 
 function renderCommentList( has_comments, data ) {
-  const commentHolder = document.createElement( 'div' );
-        commentSeparator = document.createElement( 'hr' );
-        commentHeading = document.createElement( 'h3' );
+  const commentHolder = document.createElement( 'div' ),
+        commentSeparator = document.createElement( 'hr' ),
+        commentHeading = document.createElement( 'h3' ),
         contentHolder = document.getElementById( 'contentInner' );
 
   commentHolder.appendChild( commentSeparator );
@@ -358,10 +366,10 @@ function renderCommentList( has_comments, data ) {
 };
 
 function renderIndividualComment( container, comment, author, date ) {
-  const commentHolder = document.createElement( 'div' );
-        commentContent = document.createElement( 'blockquote' );
-        commentAuthorMeta = document.createElement( 'p' );
-        commentAuthor = `Posted by ${author} on ${formatDate(date)}`;
+  const commentHolder = document.createElement( 'div' ),
+        commentContent = document.createElement( 'blockquote' ),
+        commentAuthorMeta = document.createElement( 'p' ),
+        commentAuthor = `Posted by ${author} on ${formatDate(date)}`,
         commentSeparator = document.createElement( 'hr' );
   
   commentContent.innerHTML = comment;
@@ -376,9 +384,9 @@ function renderIndividualComment( container, comment, author, date ) {
 
 function renderSinglePostContent( post_date, post_id, post_content ) {
 
-  const contentInner = document.getElementById( 'contentInner' );
-        postHolder = document.createElement( 'article' );
-        postMeta = document.createElement( 'p' );
+  const contentInner = document.getElementById( 'contentInner' ),
+        postHolder = document.createElement( 'article' ),
+        postMeta = document.createElement( 'p' ),
         postContent = document.createElement( 'div' );
 
   postMeta.className = 'text-muted small';
@@ -412,9 +420,9 @@ function getTaxonomies( type ) {
 };
 
 function renderTaxonomyHolder( type ) {
-  const taxonomyHolder = document.createElement( 'div' );
-        taxonomyHeading = document.createElement( 'h4' );
-        taxonomyList = document.createElement( 'ul' );
+  const taxonomyHolder = document.createElement( 'div' ),
+        taxonomyHeading = document.createElement( 'h4' ),
+        taxonomyList = document.createElement( 'ul' ),
         sideBar = document.getElementById( 'sideBar' );
 
   taxonomyHolder.id =  `${type}Holder`;
@@ -428,8 +436,8 @@ function renderTaxonomyHolder( type ) {
 };
 
 function renderTaxonomyList( type, id, name ) {
-  const taxonomyItem = document.createElement( 'li' );
-        taxonomyLink = document.createElement( 'a' );
+  const taxonomyItem = document.createElement( 'li' ),
+        taxonomyLink = document.createElement( 'a' ),
         taxonomyList = document.getElementById( type + 'List');
 
   taxonomyLink.href = `#${type}/${id}`
@@ -448,7 +456,6 @@ function setTaxonomyHeading( type, id ) {
     }
     response.json().then(data => {
       const header = document.getElementById( 'pageHeader' );
-      console.log(data);
       if ( 'tags' === type) {
           header.innerText = `Posts Tagged with: ${data.name}`;
       } else {
@@ -482,8 +489,10 @@ function setPageHeading( heading ) {
 };
 
 function formatDate( date ) {
-  const dateFromApi = new Date( date );
+  const dateFromApi = new Date( date ),
         dateFormatted = dateFromApi.toLocaleDateString() + " " + dateFromApi.toLocaleTimeString();
   
   return dateFormatted;
 };
+
+})();
