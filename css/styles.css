@@ -11,3 +11,22 @@
 .img-margin {
     margin: 25px 0;
 }
+
+#contentInner img,
+#contentInner video {
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 15px 0;
+}
+
+.mt-25 {
+    margin-top: 25px;
+}
+
+.mb-25 {
+    margin-bottom: 25px;
+}
+
+.mt-0 {
+    margin-top: 0;
+}

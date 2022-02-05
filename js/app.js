@@ -81,15 +81,14 @@ function loadContent() {
   const slug = getSlug();
 
   if ( null === slug || 'home' === slug ) {
-    getBlogPostList();
+      getBlogPostList();
   } else if ( 'media' === slug ) {
-    getMedia();
+      getMedia();
   } else if ( slug.indexOf( '/blog/' ) ) {
-    let shortSlug = checkSpecialTypes( 'blog', slug );
-    console.log( shortSlug );
-    getBlogPost( slug );
+      let shortSlug = checkSpecialTypes( 'blog', slug );
+      getBlogPost( shortSlug );
   } else {
-    getPageContent( slug );
+      getPageContent( slug );
   }
 };
 
@@ -241,9 +240,92 @@ function renderPostInList( title, slug, date, excerpt) {
 };
 
 function getBlogPost( slug ) {
-  console.log( 'single post view' );
+  
+  const route = API_ROUTE + 'wp/v2/posts?slug=' + slug;
+  
+  fetch( route )
+  .then(response => {
+    if (response.status !== 200) {
+      console.log("Problem! Status Code: " + response.status);
+      return;
+    }
+    response.json().then(data => {
+      setPageHeading( data[0].title.rendered );
+      clearContent();
+      renderSinglePostContent( data[0].date, data[0].id, data[0].content.rendered, );
+      console.log( data[0].id );
+      getComments( data[0].id );
+    });
+  })
+  .catch(function(err) {
+    console.log("Error: ", err);
+  });  
+
+};
+
+function getComments( post_id ) {
+  
+  const route = API_ROUTE + 'wp/v2/comments?post=' + post_id;
+  
+  console.log( route );
+  
+  fetch( route )
+  .then(response => {
+    if (response.status !== 200) {
+      console.log("Problem! Status Code: " + response.status);
+      return;
+    }
+    response.json().then(data => {
+      console.log( data );
+
+      if ( 0 === data.length ) {
+        console.log( 'no comments' );
+        renderComments( false );
+      } else {
+          console.log( 'we have comments!' );
+      }
+    });
+  })
+  .catch(function(err) {
+    console.log("Error: ", err);
+  });    
+};
+
+function renderComments( has_comments, post_id ) {
+  const commentHolder = document.createElement( 'div' );
+        commentSeparator = document.createElement( 'hr' );
+        commentHeading = document.createElement( 'h3' );
+        contentHolder = document.getElementById( 'contentInner' );
+
+  commentHolder.appendChild( commentSeparator );
+
+  if ( false === has_comments ) {
+    commentHeading.innerText = 'No Comments'
+    commentHolder.appendChild( commentHeading );
+  }
+
+  contentHolder.appendChild( commentHolder );
 
 }
+
+function renderSinglePostContent( post_date, post_id, post_content ) {
+
+  const contentInner = document.getElementById( 'contentInner' );
+        postHolder = document.createElement( 'article' );
+        postMeta = document.createElement( 'p' );
+        postContent = document.createElement( 'div' );
+
+  postMeta.classList = 'text-muted small';
+  postMeta.innerText = formatDate( post_date );
+  postContent.innerHTML = post_content;
+
+  postHolder.appendChild( postMeta );
+  postHolder.appendChild( postContent );
+
+  contentInner.appendChild( postHolder );
+
+};
+
 
 /* handle taxonomies */
 function getTaxonomies( type ) {
