@@ -266,9 +266,7 @@ function getBlogPost( slug ) {
 function getComments( post_id ) {
   
   const route = API_ROUTE + 'wp/v2/comments?post=' + post_id;
-  
-  console.log( route );
-  
+    
   fetch( route )
   .then(response => {
     if (response.status !== 200) {
@@ -279,10 +277,11 @@ function getComments( post_id ) {
       console.log( data );
 
       if ( 0 === data.length ) {
-        console.log( 'no comments' );
-        renderComments( false );
+          console.log( 'no comments' );
+          renderCommentList( false );
       } else {
           console.log( 'we have comments!' );
+          renderCommentList( true, data );
       }
     });
   })
@@ -291,7 +290,7 @@ function getComments( post_id ) {
   });    
 };
 
-function renderComments( has_comments, post_id ) {
+function renderCommentList( has_comments, data ) {
   const commentHolder = document.createElement( 'div' );
         commentSeparator = document.createElement( 'hr' );
         commentHeading = document.createElement( 'h3' );
@@ -302,11 +301,33 @@ function renderComments( has_comments, post_id ) {
   if ( false === has_comments ) {
     commentHeading.innerText = 'No Comments'
     commentHolder.appendChild( commentHeading );
+  } else {
+    commentHeading.innerText = 'Comments';
+    commentHolder.appendChild( commentHeading );
+    data.map( comment => renderIndividualComment( commentHolder, comment.content.rendered, comment.author_name, comment.date) );
+  
   }
 
   contentHolder.appendChild( commentHolder );
 
-}
+};
+
+function renderIndividualComment( container, comment, author, date ) {
+  const commentHolder = document.createElement( 'div' );
+        commentContent = document.createElement( 'blockquote' );
+        commentAuthorMeta = document.createElement( 'p' );
+        commentAuthor = `Posted by ${author} on ${formatDate(date)}`;
+        commentSeparator = document.createElement( 'hr' );
+  
+  commentContent.innerHTML = comment;
+  commentAuthorMeta.innerHTML = commentAuthor;
+  
+  commentHolder.appendChild( commentContent );
+  commentHolder.appendChild( commentAuthorMeta );
+  commentHolder.appendChild( commentSeparator );
+
+  container.appendChild( commentHolder );
+};
 
 function renderSinglePostContent( post_date, post_id, post_content ) {
 
@@ -371,7 +392,6 @@ function renderTaxonomyList( type, id, name ) {
   taxonomyItem.appendChild( taxonomyLink );
   taxonomyList.appendChild( taxonomyItem );      
 };
-
 
 /* utilities */
 
