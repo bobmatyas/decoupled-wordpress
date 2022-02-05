@@ -78,9 +78,12 @@ function listenForPageChange() {
 
 function loadContent() {  
   const slug = getSlug();
-  console.log(slug);
+ 
   if ( null === slug || 'home' === slug ) {
-      getBlogPostList();
+    setPageHeading( 'Blog' );
+    getBlogPostList();
+    clearSidebar();
+    getSideBar();
   } else if ( 'media' === slug ) {
       getMedia();
   } else if ( slug.includes( 'blog/' )) {
@@ -92,6 +95,10 @@ function loadContent() {
       const tag = checkSpecialTypes( 'tags', slug );
       getBlogPostList(null, tag); 
       setTaxonomyHeading( 'tags', tag );
+  } else if ( slug.includes( 'categories/' )) {
+      const category = checkSpecialTypes( 'categories', slug );
+      getBlogPostList(null, null, category ); 
+      setTaxonomyHeading( 'categories', category );
   } else {
       getPageContent( slug );
   }
@@ -188,14 +195,16 @@ function renderImage ( image, alt_text ) {
 
 /* blog display */
 
-function getBlogPostList( offset, tag_limit ) {
+function getBlogPostList( offset, tag_limit, category_limit ) {
 
   let route = API_ROUTE + 'wp/v2/posts'
   
   if ( null != offset) {
-    route = route + '?offset=' + offset;
+      route = route + '?offset=' + offset;
   } else if ( null != tag_limit) {
-    route = route + '?tags=' + tag_limit;
+      route = route + '?tags=' + tag_limit;
+  } else if ( null != category_limit) {
+      route = route + '?categories=' + category_limit;
   }
 
   fetch( route )
@@ -205,9 +214,6 @@ function getBlogPostList( offset, tag_limit ) {
       return;
     }
     response.json().then(data => {
-      if ( null === tag_limit ) {
-        setPageHeading( 'Blog' );
-      }
       clearContent();
       clearSidebar();
       data.map( post => renderPostInList( post.title.rendered, post.slug, post.date, post.excerpt.rendered ));
