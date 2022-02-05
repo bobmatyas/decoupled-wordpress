@@ -1,4 +1,3 @@
-console.log('app loaded');
 
 const API_ROUTE = 'https://sandalwood.mystagingwebsite.com/wp-json/' // define main site URL
 
@@ -133,7 +132,6 @@ function getPageContent( slug ) {
       return;
     }
     response.json().then(data => {
-      console.log(data[0].title.rendered);
       setPageHeading(data[0].title.rendered);
       setPageContent(data[0].content.rendered);
       if ( slug != '' | slug != 'home' ) {
@@ -253,7 +251,6 @@ function getBlogPost( slug ) {
       setPageHeading( data[0].title.rendered );
       clearContent();
       renderSinglePostContent( data[0].date, data[0].id, data[0].content.rendered, );
-      console.log( data[0].id );
       getComments( data[0].id );
     });
   })
@@ -274,13 +271,10 @@ function getComments( post_id ) {
       return;
     }
     response.json().then(data => {
-      console.log( data );
 
       if ( 0 === data.length ) {
-          console.log( 'no comments' );
           renderCommentList( false );
       } else {
-          console.log( 'we have comments!' );
           renderCommentList( true, data );
       }
     });
