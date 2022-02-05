@@ -356,9 +356,9 @@ function renderTaxonomyHolder( type ) {
   type = type[0].toUpperCase() + type.substring(1);
   taxonomyHeading.innerText = type;
 
+  taxonomyHolder.appendChild( taxonomyHeading );
+  taxonomyHolder.appendChild( taxonomyList );
   sideBar.appendChild( taxonomyHolder );
-  sideBar.appendChild( taxonomyHeading );
-  sideBar.appendChild( taxonomyList );
 };
 
 function renderTaxonomyList( type, id, name ) {
