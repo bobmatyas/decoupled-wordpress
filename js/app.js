@@ -5,8 +5,8 @@ const API_ROUTE = 'https://sandalwood.mystagingwebsite.com/wp-json/' // define m
 
 getSiteInfo();
 setupMenu();
-getBlogPostList();
 listenForPageChange();
+loadContent();
 
 /* get site title / description */
 
@@ -78,14 +78,20 @@ function listenForPageChange() {
 
 function loadContent() {  
   const slug = getSlug();
-
+  console.log(slug);
   if ( null === slug || 'home' === slug ) {
       getBlogPostList();
   } else if ( 'media' === slug ) {
       getMedia();
-  } else if ( slug.indexOf( '/blog/' ) ) {
+  } else if ( slug.includes( 'blog/' )) {
       let shortSlug = checkSpecialTypes( 'blog', slug );
       getBlogPost( shortSlug );
+      clearSidebar();
+      getSideBar();
+  } else if ( slug.includes( 'tags/' )) {
+      const tag = checkSpecialTypes( 'tags', slug );
+      getBlogPostList(null, tag); 
+      setTaxonomyHeading( 'tags', tag );
   } else {
       getPageContent( slug );
   }
@@ -182,12 +188,14 @@ function renderImage ( image, alt_text ) {
 
 /* blog display */
 
-function getBlogPostList( offset ) {
+function getBlogPostList( offset, tag_limit ) {
 
   let route = API_ROUTE + 'wp/v2/posts'
   
-  if ( offset != null ) {
+  if ( null != offset) {
     route = route + '?offset=' + offset;
+  } else if ( null != tag_limit) {
+    route = route + '?tags=' + tag_limit;
   }
 
   fetch( route )
@@ -197,12 +205,13 @@ function getBlogPostList( offset ) {
       return;
     }
     response.json().then(data => {
-      setPageHeading( 'Blog' );
+      if ( null === tag_limit ) {
+        setPageHeading( 'Blog' );
+      }
       clearContent();
       clearSidebar();
-      getTaxonomies( 'tags' );
-      getTaxonomies( 'categories' );
       data.map( post => renderPostInList( post.title.rendered, post.slug, post.date, post.excerpt.rendered ));
+      getSideBar();
     });
   })
   .catch(function(err) {
@@ -259,6 +268,12 @@ function getBlogPost( slug ) {
   });  
 
 };
+
+function getSideBar() {
+  getTaxonomies( 'tags' );
+  getTaxonomies( 'categories' );
+};
+
 
 function getComments( post_id ) {
   
@@ -385,6 +400,32 @@ function renderTaxonomyList( type, id, name ) {
   taxonomyLink.innerText = name;
   taxonomyItem.appendChild( taxonomyLink );
   taxonomyList.appendChild( taxonomyItem );      
+};
+
+
+function setTaxonomyHeading( type, id ) {
+  fetch( API_ROUTE + 'wp/v2/' + type + '/' + id )
+  .then(response => {
+    if (response.status !== 200) {
+      console.log("Problem! Status Code: " + response.status);
+      return;
+    }
+    response.json().then(data => {
+      const header = document.getElementById( 'pageHeader' );
+      console.log(data);
+      if ( 'tags' === type) {
+          header.innerText = `Posts Tagged with: ${data.name}`;
+      } else {
+          header.innerText = `Posts Categorized with: ${data.name}`;
+      }
+    });
+  })
+  .catch(function(err) {
+    console.log("Error: ", err);
+  });    
+
+
+
 };
 
 /* utilities */
