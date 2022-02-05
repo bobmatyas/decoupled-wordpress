@@ -79,12 +79,22 @@ function listenForPageChange() {
 function loadContent() {  
   const slug = getSlug();
  
-  if ( null === slug || 'home' === slug ) {
+  if ( null === slug ) {
     setPageHeading( 'Blog' );
-    getBlogPostList();
+    getBlogPostList( 'home' );
     clearSidebar();
     getSideBar();
+  } else if ( slug.includes ( 'home/') ) {
+    let shortSlug = checkSpecialTypes( 'home', slug );
+    getBlogPostList( 'home', shortSlug );
+    setPageHeading( 'Blog' );     
+  } else if ( 'home' === slug ) {
+      setPageHeading( 'Blog' );
+      getBlogPostList( 'home' );
+      clearSidebar();
+      getSideBar();  
   } else if ( 'media' === slug ) {
+      clearSidebar();
       getMedia();
   } else if ( slug.includes( 'blog/' )) {
       let shortSlug = checkSpecialTypes( 'blog', slug );
@@ -93,11 +103,11 @@ function loadContent() {
       getSideBar();
   } else if ( slug.includes( 'tags/' )) {
       const tag = checkSpecialTypes( 'tags', slug );
-      getBlogPostList(null, tag); 
+      getBlogPostList(null, null, tag); 
       setTaxonomyHeading( 'tags', tag );
   } else if ( slug.includes( 'categories/' )) {
       const category = checkSpecialTypes( 'categories', slug );
-      getBlogPostList(null, null, category ); 
+      getBlogPostList(null, null, null, category ); 
       setTaxonomyHeading( 'categories', category );
   } else {
       getPageContent( slug );
@@ -110,6 +120,9 @@ function checkSpecialTypes( type, slug ) {
     let newSlug;
 
     switch (type) {
+      case 'home':
+        newSlug = slug.replace('home/', '');
+        break;
       case 'blog':
         newSlug = slug.replace('blog/', '');
         break;
@@ -188,19 +201,19 @@ function renderImage ( image, alt_text ) {
         pageContent = document.getElementById( 'contentInner' );
   img.src = image;
   img.alt = alt_text;
-  img.classList = 'img-responsive img-margin';
+  img.className = 'img-responsive img-margin';
 
   pageContent.appendChild( img );
 };
 
 /* blog display */
 
-function getBlogPostList( offset, tag_limit, category_limit ) {
+function getBlogPostList( is_home, offset, tag_limit, category_limit ) {
 
   let route = API_ROUTE + 'wp/v2/posts'
   
   if ( null != offset) {
-      route = route + '?offset=' + offset;
+      route = route + '?page=' + offset;
   } else if ( null != tag_limit) {
       route = route + '?tags=' + tag_limit;
   } else if ( null != category_limit) {
@@ -213,11 +226,28 @@ function getBlogPostList( offset, tag_limit, category_limit ) {
       console.log("Problem! Status Code: " + response.status);
       return;
     }
-    response.json().then(data => {
+    response.json().then(data => {  
       clearContent();
       clearSidebar();
       data.map( post => renderPostInList( post.title.rendered, post.slug, post.date, post.excerpt.rendered ));
       getSideBar();
+      console.log(offset);
+      console.log(is_home);
+      if ( null != is_home ) {
+        const nextPage = document.createElement( 'a' );
+        nextPage.className = 'btn btn-primary'  ;
+        if ( undefined === offset) {
+          nextPage.href = '#home/2';
+        } else {
+
+          let increment = parseInt(offset) + 1;
+          nextPage.href = `#home/${increment}`
+        }
+
+        nextPage.innerText  = 'Next';
+        const container = document.getElementById( 'contentInner' );
+        container.appendChild( nextPage );  
+      }
     });
   })
   .catch(function(err) {
@@ -236,7 +266,7 @@ function renderPostInList( title, slug, date, excerpt) {
         postSeparator = document.createElement( 'hr' );
 
   postLink.innerText = title;
-  postMeta.classList = 'text-muted small';
+  postMeta.className = 'text-muted small';
   postMeta.innerText = formatDate( date );
   postExcerpt.innerHTML = excerpt;
   postReadMoreLink.href = `#blog/${slug}`;
@@ -351,7 +381,7 @@ function renderSinglePostContent( post_date, post_id, post_content ) {
         postMeta = document.createElement( 'p' );
         postContent = document.createElement( 'div' );
 
-  postMeta.classList = 'text-muted small';
+  postMeta.className = 'text-muted small';
   postMeta.innerText = formatDate( post_date );
   postContent.innerHTML = post_content;
 
